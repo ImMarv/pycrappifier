@@ -1,4 +1,4 @@
-# Enshittify
+# Pycrappifier
 
 This project is a simple Python application for compressing audio files using ffmpeg. It features a basic graphical user interface (GUI) built with PyQt and a main Python file for core operations.
 
