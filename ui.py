@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QPushButton, QLabel, QFileDialog,
-    QSlider, QComboBox, QHBoxLayout, QVBoxLayout
+    QSlider, QHBoxLayout, QVBoxLayout, QCheckBox, QComboBox
 )
 from PyQt5.QtCore import Qt
 
@@ -23,7 +23,6 @@ class AudioExporterUI(QWidget):
 
         # === Song Details ===
         self.audioDetailsLabel = QLabel("")
-
         audioDetailsLayout = QHBoxLayout()
         audioDetailsLayout.addWidget(self.audioDetailsLabel)
         
@@ -38,20 +37,6 @@ class AudioExporterUI(QWidget):
         bitrateSlider_layout.addWidget(self.bitrate_label)
         bitrateSlider_layout.addWidget(self.bitrateSlider)
 
-        # === Repeat factor dropdown ===
-        self.repeat_label = QLabel("Repeat Factor:")
-        self.combo = QComboBox()
-        self.combo.addItems(["1x", "2x", "3x", "4x", "5x"])
-
-        repeat_layout = QHBoxLayout()
-        repeat_layout.addWidget(self.repeat_label)
-        repeat_layout.addWidget(self.combo)
-
-        # === Export button ===
-        self.export_btn = QPushButton("Export")
-        exportButton_layout = QHBoxLayout()
-        exportButton_layout.addWidget(self.export_btn)
-
         # === Sample Rate Combo Box ===
         self.sample_rates = [8000, 12000, 16000, 22050, 32000, 44100, 48000]
         self.sample_rate_label = QLabel("Sample Rate: ")
@@ -63,18 +48,30 @@ class AudioExporterUI(QWidget):
         sample_rate_layout.addWidget(self.sample_rate_label)
         sample_rate_layout.addWidget(self.sampleRateCombo)
 
+        # === Stereo to Mono CheckBox ===
+        self.stereo_label = QLabel("Mono")
+        self.stereoSwitch = QCheckBox()
+        self.stereoSwitch.setChecked(False)
+        stereo_layout = QHBoxLayout()
+        stereo_layout.addWidget(self.stereo_label)
+        stereo_layout.addWidget(self.stereoSwitch)
+
+        # === Export button ===
+        self.export_btn = QPushButton("Export")
+        exportButton_layout = QHBoxLayout()
+        exportButton_layout.addWidget(self.export_btn)
+
         # === Main layout ===
         layout = QVBoxLayout()
         layout.addLayout(file_layout)
-        layout.addSpacing(10)
         layout.addLayout(audioDetailsLayout)
         layout.addSpacing(10)
         layout.addLayout(bitrateSlider_layout)
         layout.addSpacing(10)
         layout.addLayout(sample_rate_layout)
         layout.addSpacing(10)
-        layout.addLayout(repeat_layout)
-        layout.addSpacing(10)
+        layout.addLayout(stereo_layout)
+        layout.addSpacing(20)
         layout.addLayout(exportButton_layout)
 
         self.setLayout(layout)

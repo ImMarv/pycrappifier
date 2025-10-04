@@ -6,6 +6,7 @@
 import os
 import subprocess
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from CommandBuilder import CommandBuilder
 
 import ui
 
@@ -54,7 +55,7 @@ def getAudioInfo(inputFile):
         ffprobe_cmd,
         "-v", "error",
         "-show_entries", "format=filename,duration,bit_rate",
-        "-show_entries", "stream=sample_rate",
+        "-show_entries", "stream=sample_rate,channels",
         "-of", "json",
         inputFile
     ]
@@ -65,6 +66,7 @@ def getAudioInfo(inputFile):
         duration = float(info["format"]["duration"])
         bitrate = int(info["format"]["bit_rate"])
         sampleRate = int(info["streams"][0]["sample_rate"])
+        channels = int(info["streams"][0]["channels"])
         
         # Format duration as mm:ss
         minutes = int(duration // 60)
@@ -76,12 +78,12 @@ def getAudioInfo(inputFile):
         
         # Format sample rate as kHz
         sample_rate_khz = sampleRate / 1000
-        sample_rate_str = f"{sample_rate_khz:.1f}"
+        sample_rate_str = f"{sample_rate_khz:.1f} kHz"
 
         # Format filename to only include audio file name
         filename_str = os.path.basename(filename)
         
-        return filename_str, duration_str, bitrate_kbps, sample_rate_str
+        return filename_str, duration_str, bitrate_kbps, sample_rate_str, channels
     except FileNotFoundError:
         print("Error: ffprobe not found. Please ensure ffprobe is installed and in your PATH.")
         return None
@@ -89,20 +91,42 @@ def getAudioInfo(inputFile):
         print(f"Error getting audio info: {e}")
         return None
 
-def compress_audio(input_file, output_file, bitrate=0, sample_rate=0, overwrite = True):
-    # Provide the full path to ffmpeg if it's not in PATH, e.g. r"C:\ffmpeg\bin\ffmpeg.exe"
+def compress_audio(ui, input_file, output_file, bitrate=0, sample_rate=0, mono=False, overwrite=True):
     ffmpeg_cmd = "ffmpeg"
-    # Ensure output_file ends with .mp3
-    if not output_file.lower().endswith('.mp3'):
-        output_file += ".mp3"
-        overwrite_flag = "-y" if overwrite else "-n"
-    cmd = [
-        ffmpeg_cmd,
-        "-i", input_file,
-        "-b:a", bitrate,
-        "-ar", str(sample_rate),
-        output_file
-    ]
+
+    # Set mono flag from UI
+    mono = ui.stereoSwitch.isChecked()
+
+    # Accept bitrate as string with 'k' suffix
+    if isinstance(bitrate, str) and bitrate.endswith('k'):
+        try:
+            bitrate = int(bitrate[:-1]) * 1000  # Convert '128k' to 128000
+        except ValueError:
+            raise ValueError("Bitrate must be an integer followed by 'k', e.g. '128k'")
+    elif isinstance(bitrate, int):
+        if bitrate <= 0:
+            raise ValueError("Bitrate must be a positive integer or a string like '128k'")
+    else:
+        raise ValueError("Bitrate must be a positive integer or a string like '128k'")
+    
+    sample_rate_arg = sample_rate if sample_rate and int(sample_rate) > 0 else None
+
+    cmd = CommandBuilder().build(
+        input_file=input_file,
+        output_file=output_file,
+        bitrate=bitrate,
+        sample_rate=sample_rate,
+        mono=mono,
+        overwrite=overwrite
+    )
+    print("Running command:", CommandBuilder().build_str(
+        input_file=input_file,
+        output_file=output_file,
+        bitrate=bitrate,
+        sample_rate=sample_rate,
+        mono=mono,
+        overwrite=overwrite
+    ))
     try:
         subprocess.run(cmd, check=True)
     except FileNotFoundError:
@@ -111,25 +135,6 @@ def compress_audio(input_file, output_file, bitrate=0, sample_rate=0, overwrite 
     except subprocess.CalledProcessError as e:
         print("Error compressing audio:", e.stderr)
         raise
-
-# Function that repeats compression multiple times, only keeping the final output
-def repeat_compress(input_file, output_file, bitrate="128k", iterations=0):
-    temp_file = "temp.mp3"
-    current_input = input_file
-
-    if (iterations <= 1):
-        return
-    else:
-        for i in range(iterations):
-            current_output = temp_file if i < iterations - 1 else output_file
-            compress_audio(current_input, current_output, bitrate)
-            current_input = temp_file
-
-    # Clean up temporary file if it exists
-    if os.path.exists(temp_file):
-        os.remove(temp_file)
-    return True
-
 
 # Connect UI signals to logic functions
 def connect_signals(ui):
@@ -157,12 +162,20 @@ def update_audio_settings(ui):
 
     # Update labels based on file info
     if audioInfo:
-        filename, duration, bitrate, sample_rate = audioInfo
+        filename, duration, bitrate, sample_rate, channels = audioInfo
 
         # set slider max based on file bitrate
         ui.bitrateSlider.setMaximum(bitrate if bitrate else 320)
 
-        details = f"{filename} - {duration} | {bitrate} kbps, {sample_rate}"
+        # Update checkbox label based on channels
+        if channels == 1:
+            channels = "Mono"
+            ui.stereoSwitch.setChecked(True)
+        elif channels == 2:
+            channels = "Stereo"
+            ui.stereoSwitch.setChecked(False)
+
+        details = f"{filename} - {duration} | {bitrate} kbps, {sample_rate} | {channels} channels"
         ui.audioDetailsLabel.setText(details)
     else:
         ui.audioDetailsLabel.setText("No file selected.")
@@ -185,7 +198,6 @@ def export_audio(ui):
         return
 
     setBitrate = ui.bitrateSlider.value()
-    repeat_factor = int(ui.combo.currentText().replace("x", ""))
     processed_file = input_file.rsplit('.', 1)[0] + "_processed.mp3"
     sample_rate = int(ui.sampleRateCombo.currentText())
 
@@ -205,8 +217,8 @@ def export_audio(ui):
             os.remove(processed_file if processed_file else None)
 
     try:
-        compress_audio(input_file, processed_file, f"{setBitrate}k", sample_rate, overwrite=overwrite)
-        repeat_compress(processed_file, f"{setBitrate}k", repeat_factor)
+        # single compression pass — repeat removed
+        compress_audio(ui, input_file, processed_file, f"{setBitrate}k", sample_rate, overwrite=overwrite)
         QMessageBox.information(ui, "Exported", "Audio exported successfully!", QMessageBox.Ok)
     except Exception as e:
         QMessageBox.critical(ui, "Error", f"Failed to export audio: {e}", QMessageBox.Ok)
