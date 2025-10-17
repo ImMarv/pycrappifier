@@ -6,10 +6,10 @@
 import os
 import subprocess
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from CommandBuilder import CommandBuilder
+from tools.CommandBuilder import CommandBuilder
 
 import ui
-
+#region Getters
 # Function to get the bitrate of an audio file using ffprobe
 def get_bitrate(input_file):
     # Provide the full path to ffprobe if it's not in PATH, e.g. r"C:\ffmpeg\bin\ffprobe.exe"
@@ -90,6 +90,7 @@ def getAudioInfo(inputFile):
     except Exception as e:
         print(f"Error getting audio info: {e}")
         return None
+#endregion
 
 def compress_audio(ui, input_file, output_file, bitrate=0, sample_rate=0, mono=False, overwrite=True):
     ffmpeg_cmd = "ffmpeg"
@@ -136,21 +137,7 @@ def compress_audio(ui, input_file, output_file, bitrate=0, sample_rate=0, mono=F
         print("Error compressing audio:", e.stderr)
         raise
 
-# Connect UI signals to logic functions
-def connect_signals(ui):
-    ui.browse_btn.clicked.connect(lambda: browse_file(ui))
-    ui.export_btn.clicked.connect(lambda: export_audio(ui))
-    ui.bitrateSlider.valueChanged.connect(lambda: update_bitrate_label(ui))
-
-
-# This should particularly get the file path.
-def browse_file(ui):
-    options = QFileDialog.Options()
-    file_name, _ = QFileDialog.getOpenFileName(ui, "Select Audio File", "", "Audio Files (*.mp3 *.wav *.flac);;All Files (*)", options=options)
-    if file_name:
-        ui.file_label.setText(file_name)
-        ui.browse_btn.setEnabled(True)
-        update_audio_settings(ui)
+#region UI Update Functions
 
 def update_audio_settings(ui):
     """Called when a file is selected"""
@@ -190,6 +177,25 @@ def update_bitrate_label(ui):
     """Called whenever the bitrate slider value changes"""
     ui.bitrate_label.setText(f"Bitrate: {ui.bitrateSlider.value()}k")
 
+#endregion
+
+#region Signal and IO Functions
+
+# Connect UI signals to logic functions
+def connect_signals(ui):
+    ui.browse_btn.clicked.connect(lambda: browse_file(ui))
+    ui.export_btn.clicked.connect(lambda: export_audio(ui))
+    ui.bitrateSlider.valueChanged.connect(lambda: update_bitrate_label(ui))
+
+
+# This should particularly get the file path.
+def browse_file(ui):
+    options = QFileDialog.Options()
+    file_name, _ = QFileDialog.getOpenFileName(ui, "Select Audio File", "", "Audio Files (*.mp3 *.wav *.flac);;All Files (*)", options=options)
+    if file_name:
+        ui.file_label.setText(file_name)
+        ui.browse_btn.setEnabled(True)
+        update_audio_settings(ui)
 
 def export_audio(ui):
     input_file = ui.file_label.text()
@@ -222,3 +228,5 @@ def export_audio(ui):
         QMessageBox.information(ui, "Exported", "Audio exported successfully!", QMessageBox.Ok)
     except Exception as e:
         QMessageBox.critical(ui, "Error", f"Failed to export audio: {e}", QMessageBox.Ok)
+
+#endregion
