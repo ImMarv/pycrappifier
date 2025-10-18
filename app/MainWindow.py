@@ -23,7 +23,6 @@ class MainWindow:
         )
         if file_name:
             # set the button height back to default
-            self.ui.browse_btn.setMaximumHeight(30)
             self.ui.file_label.setVisible(True)
             self.ui.file_label.setText(file_name)
             self.update_audio_settings(file_name)
