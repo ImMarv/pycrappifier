@@ -24,10 +24,11 @@ class AudioExporterUI(QtWidgets.QWidget):
 
         # === Song Details ===
         self.audioDetailsLabel = QLabel("")
+        self.audioDetailsLabel.setVisible(False)
         audioDetailsLayout = QHBoxLayout()
         audioDetailsLayout.setAlignment(QtCore.Qt.AlignCenter)
         audioDetailsLayout.addWidget(self.audioDetailsLabel)
-        self.audioDetailsLabel.setVisible(False)
+        
 
         # === Bitrate slider ===
         self.bitrate_label = QLabel("Bitrate: ")
