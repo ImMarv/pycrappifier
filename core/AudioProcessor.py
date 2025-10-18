@@ -1,6 +1,6 @@
 import subprocess
-from tools.CommandBuilder import CommandBuilder
-from tools.helpers.FFmpegUtils import FFmpegUtils
+from core.CommandBuilder import CommandBuilder
+from core.helpers.FFmpegUtils import FFmpegUtils
 
 class AudioProcessor:
     """Class to handle audio processing using ffmpeg commands built by CommandBuilder."""
@@ -8,6 +8,7 @@ class AudioProcessor:
         self.command_builder = CommandBuilder(cmd=cmd)
 
     def compress(self, input_file, output_file, bitrate=None, sample_rate=None, mono=False, overwrite=True):
+        """Compress audio file with specified parameters."""
         if isinstance(bitrate, str) and bitrate.endswith('k'):
             try:
                 bitrate = int(bitrate[:-1]) * 1000  # Convert '128k' to 128000
@@ -24,4 +25,5 @@ class AudioProcessor:
         subprocess.run(command, check=True)
 
     def get_audio_info(self, input_file):
+        """Retrieve audio file information using FFmpegUtils."""
         return FFmpegUtils.getAudioInfo(input_file)

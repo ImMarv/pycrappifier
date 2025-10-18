@@ -15,17 +15,20 @@ class AudioExporterUI(QtWidgets.QWidget):
 
         # === File selection ===
         self.browse_btn = QPushButton("Choose File")
-        self.browse_btn = QtWidgets.QPushButton("Choose File")
-        self.file_label = QtWidgets.QLabel("")
+        self.file_label = QLabel("")
+        self.file_label.setVisible(False)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.browse_btn)
         file_layout.addWidget(self.file_label)
 
         # === Song Details ===
         self.audioDetailsLabel = QLabel("")
-        self.audioDetailsLabel = QtWidgets.QLabel("")
-        audioDetailsLayout = QtWidgets.QHBoxLayout()
+        self.audioDetailsLabel.setVisible(False)
+        audioDetailsLayout = QHBoxLayout()
+        audioDetailsLayout.setAlignment(QtCore.Qt.AlignCenter)
         audioDetailsLayout.addWidget(self.audioDetailsLabel)
+        
+
         # === Bitrate slider ===
         self.bitrate_label = QLabel("Bitrate: ")
         self.bitrate_label = QtWidgets.QLabel("Bitrate: ")
@@ -37,10 +40,11 @@ class AudioExporterUI(QtWidgets.QWidget):
         bitrateSlider_layout = QtWidgets.QHBoxLayout()
         bitrateSlider_layout.addWidget(self.bitrate_label)
         bitrateSlider_layout.addWidget(self.bitrateSlider)
+
         # === Sample Rate Combo Box ===
         self.sample_rates = [8000, 12000, 16000, 22050, 32000, 44100, 48000]
         self.sample_rates = [8000, 12000, 16000, 22050, 32000, 44100, 48000]
-        self.sample_rate_label = QtWidgets.QLabel("Sample Rate: ")
+        self.sample_rate_label = QLabel("Sample Rate: ")
         self.sampleRateCombo = QtWidgets.QComboBox()
         self.sampleRateCombo.addItems([str(rate) for rate in self.sample_rates])
         self.sampleRateCombo.setCurrentIndex(self.sample_rates.index(44100))
@@ -58,23 +62,28 @@ class AudioExporterUI(QtWidgets.QWidget):
 
         # === Export button ===
         self.export_btn = QPushButton("Export")
-        self.export_btn = QtWidgets.QPushButton("Export")
-        exportButton_layout = QtWidgets.QHBoxLayout()
+        exportButton_layout = QHBoxLayout()
         exportButton_layout.addWidget(self.export_btn)
+
         # === Main layout ===
-        layout = QVBoxLayout()
-        layout = QtWidgets.QVBoxLayout()
-        layout.addLayout(file_layout)
-        layout.addLayout(audioDetailsLayout)
-        layout.addSpacing(10)
-        layout.addLayout(bitrateSlider_layout)
-        layout.addSpacing(10)
-        layout.addLayout(sample_rate_layout)
-        layout.addSpacing(10)
-        layout.addLayout(stereo_layout)
-        layout.addSpacing(20)
-        layout.addLayout(exportButton_layout)
-        self.setLayout(layout)
+        ## Info layout
+        info_layout = QVBoxLayout()
+        info_layout.addLayout(file_layout)
+        info_layout.addLayout(audioDetailsLayout)
+        ## Settings layout
+        settings_layout = QVBoxLayout()
+        settings_layout.addLayout(bitrateSlider_layout)
+        settings_layout.addSpacing(5)
+        settings_layout.addLayout(sample_rate_layout)
+        settings_layout.addSpacing(5)
+        settings_layout.addLayout(stereo_layout)
+        ## Main layout
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(info_layout)
+        main_layout.addLayout(settings_layout)
+        main_layout.addSpacing(5)
+        main_layout.addLayout(exportButton_layout)
+        self.setLayout(main_layout)
 
 
 if __name__ == "__main__":
