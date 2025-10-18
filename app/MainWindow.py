@@ -1,5 +1,5 @@
 import os
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets # type: ignore
 from tools.AudioProcessor import AudioProcessor
 
 class MainWindow:
@@ -22,6 +22,9 @@ class MainWindow:
             self.ui, "Select Audio File", "", "Audio Files (*.mp3 *.wav *.flac)"
         )
         if file_name:
+            # set the button height back to default
+            self.ui.browse_btn.setMaximumHeight(30)
+            self.ui.file_label.setVisible(True)
             self.ui.file_label.setText(file_name)
             self.update_audio_settings(file_name)
 
@@ -31,6 +34,9 @@ class MainWindow:
         if not info:
             self.ui.audioDetailsLabel.setText("Could not read audio info.")
             return
+        # unhide audio details label
+        self.ui.audioDetailsLabel.setVisible(True)
+        
 
         mins, secs = divmod(int(info["duration"]), 60)
         duration_str = f"{mins}:{secs:02d} min"

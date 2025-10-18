@@ -13,9 +13,11 @@ class AudioExporterUI(QtWidgets.QWidget):
         self.setFixedSize(480, 320)
         self.setStyleSheet("background-color: #1a1a1f; color: white; font-size: 12pt;")
 
+
         # === File selection ===
         self.browse_btn = QPushButton("Choose File")
         self.file_label = QLabel("")
+        self.file_label.setVisible(False)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.browse_btn)
         file_layout.addWidget(self.file_label)
@@ -25,6 +27,7 @@ class AudioExporterUI(QtWidgets.QWidget):
         audioDetailsLayout = QHBoxLayout()
         audioDetailsLayout.setAlignment(QtCore.Qt.AlignCenter)
         audioDetailsLayout.addWidget(self.audioDetailsLabel)
+        self.audioDetailsLabel.setVisible(False)
 
         # === Bitrate slider ===
         self.bitrate_label = QLabel("Bitrate: ")
@@ -61,19 +64,24 @@ class AudioExporterUI(QtWidgets.QWidget):
         self.export_btn = QPushButton("Export")
         exportButton_layout = QHBoxLayout()
         exportButton_layout.addWidget(self.export_btn)
+
         # === Main layout ===
-        layout = QVBoxLayout()
-        layout.addLayout(file_layout)
-        layout.addLayout(audioDetailsLayout)
-        layout.addSpacing(10)
-        layout.addLayout(bitrateSlider_layout)
-        layout.addSpacing(10)
-        layout.addLayout(sample_rate_layout)
-        layout.addSpacing(10)
-        layout.addLayout(stereo_layout)
-        layout.addSpacing(20)
-        layout.addLayout(exportButton_layout)
-        self.setLayout(layout)
+        ## Info layout
+        info_layout = QVBoxLayout()
+        info_layout.addLayout(file_layout)
+        info_layout.addLayout(audioDetailsLayout)
+        ## Settings layout
+        settings_layout = QVBoxLayout()
+        settings_layout.addLayout(bitrateSlider_layout)
+        settings_layout.addLayout(sample_rate_layout)
+        settings_layout.addLayout(stereo_layout)
+        ## Main layout
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(info_layout)
+        main_layout.addLayout(settings_layout)
+        main_layout.addSpacing(10)
+        main_layout.addLayout(exportButton_layout)
+        self.setLayout(main_layout)
 
 
 if __name__ == "__main__":
