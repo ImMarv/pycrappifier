@@ -1,6 +1,6 @@
 import subprocess
-from tools.CommandBuilder import CommandBuilder
-from tools.helpers.FFmpegUtils import FFmpegUtils
+from core.CommandBuilder import CommandBuilder
+from core.helpers.FFmpegUtils import FFmpegUtils
 
 class AudioProcessor:
     """Class to handle audio processing using ffmpeg commands built by CommandBuilder."""

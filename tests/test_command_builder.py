@@ -2,9 +2,9 @@ import shlex
 import pytest
 import os
 import sys
-# Ensure the project root is on sys.path so 'tools' can be imported when running tests directly
+# Ensure the project root is on sys.path so 'core' can be imported when running tests directly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from tools.CommandBuilder import CommandBuilder
+from core.CommandBuilder import CommandBuilder
 
 BASE_AUDIO = "base_audio.wav"
 

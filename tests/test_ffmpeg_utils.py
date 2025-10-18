@@ -7,7 +7,7 @@ import pytest
 
 
 def _load_module():
-    for name in ("pycrappifier.tools.helpers.FFmpegUtils", "tools.helpers.FFmpegUtils", "FFmpegUtils"):
+    for name in ("pycrappifier.core.helpers.FFmpegUtils", "core.helpers.FFmpegUtils", "FFmpegUtils"):
         try:
             return importlib.import_module(name)
         except Exception:

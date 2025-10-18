@@ -1,6 +1,6 @@
 import os
 from PyQt5 import QtWidgets # type: ignore
-from tools.AudioProcessor import AudioProcessor
+from core.AudioProcessor import AudioProcessor
 
 class MainWindow:
     """Controller that binds UI signals to logic."""
