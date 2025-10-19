@@ -1,5 +1,6 @@
 import os
-from PyQt5 import QtWidgets # type: ignore
+from PyQt5 import QtWidgets, QtCore # type: ignore
+from core.AudioPlayer import AudioPlayer
 from core.AudioProcessor import AudioProcessor
 
 class MainWindow:
@@ -8,6 +9,11 @@ class MainWindow:
     def __init__(self, ui):
         self.ui = ui
         self.processor = AudioProcessor()
+        self.audio_player = AudioPlayer()
+        # Adding a timer to update the music player slider periodically
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(500)  # Update every 500 ms
+        self.timer.timeout.connect(self.update_music_player_slider)
         self.connect_signals()
 
     def connect_signals(self):
@@ -15,6 +21,8 @@ class MainWindow:
         self.ui.browse_btn.clicked.connect(self.browse_file)
         self.ui.export_btn.clicked.connect(self.export_audio)
         self.ui.bitrateSlider.valueChanged.connect(self.update_bitrate_label)
+        self.ui.play_btn.clicked.connect(self.music_player_play)
+        self.ui.stop_btn.clicked.connect(self.music_player_stop)
 
     def browse_file(self):
         """Open a file dialog to select an audio file."""
@@ -22,10 +30,14 @@ class MainWindow:
             self.ui, "Select Audio File", "", "Audio Files (*.mp3 *.wav *.flac)"
         )
         if file_name:
-            # set the button height back to default
+            if self.audio_player.is_playing:
+                self.audio_player.stop()
+                self.ui.music_slider.setValue(0)
             self.ui.file_label.setVisible(True)
             self.ui.file_label.setText(file_name)
             self.update_audio_settings(file_name)
+            self.audio_player.load(file_name)
+            self.update_music_player_slider_length()
 
     def update_audio_settings(self, file_path):
         """Update UI elements based on the selected audio file's properties."""
@@ -52,6 +64,29 @@ class MainWindow:
     def update_bitrate_label(self):
         """Update the bitrate label when the slider value changes."""
         self.ui.bitrate_label.setText(f"Bitrate: {self.ui.bitrateSlider.value()}k")
+    def music_player_play(self):
+        """Starts the music player and timer."""
+        self.audio_player.play()
+        self.timer.start()
+    def music_player_stop(self):
+        """Stops the music player and reset the timer and slider."""
+        self.audio_player.stop()
+        self.timer.stop()
+        self.ui.music_slider.setValue(0)
+    
+    def update_music_player_slider_length(self):
+        """Updates the length of the music player slider based on the audio's total length."""
+        total_length = int(self.processor.get_audio_info(self.ui.file_label.text())["duration"])
+        self.ui.music_slider.setMaximum(total_length)
+
+    def update_music_player_slider(self):
+        """Updates the position slider based on the audio's current timeframe."""
+        if not self.audio_player.is_playing:
+            return
+        current_position = int(self.audio_player.get_current_position())
+        self.ui.music_slider.blockSignals(True)
+        self.ui.music_slider.setValue(current_position)
+        self.ui.music_slider.blockSignals(False)
 
     def export_audio(self):
         """Export the audio file with the selected settings."""
