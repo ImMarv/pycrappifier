@@ -11,7 +11,7 @@ class MainWindow:
         self.processor = AudioProcessor()
         self.audio_player = AudioPlayer()
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(500)  # Update slider every 100 ms
+        self.timer.setInterval(100)  # Update slider every 100 ms
         self.connect_signals()
 
     def connect_signals(self):
@@ -40,6 +40,7 @@ class MainWindow:
             self.update_audio_settings(file_name)
             self.audio_player.load(file_name)
             self.update_music_player_slider_length()
+            self.ui.elapsed_time_label.setText("0:00")
 
     def update_audio_settings(self, file_path):
         """Update UI elements based on the selected audio file's properties."""
@@ -93,6 +94,7 @@ class MainWindow:
         if self.audio_player.is_playing:
             self.update_music_player_slider_length()  # ensure slider max is correct
             current_pos = int(self.audio_player.get_current_position())
+            self.ui.elapsed_time_label.setText(f"{current_pos // 60000}:{(current_pos // 1000) % 60:02d}")
             self.ui.music_slider.setValue(current_pos)
 
     def update_slider_position(self, position):
