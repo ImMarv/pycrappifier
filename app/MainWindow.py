@@ -40,7 +40,6 @@ class MainWindow:
             self.update_audio_settings(file_name)
             self.audio_player.load(file_name)
             self.update_music_player_slider_length()
-            self.ui.elapsed_time_label.setText("0:00")
 
     def update_audio_settings(self, file_path):
         """Update UI elements based on the selected audio file's properties."""
