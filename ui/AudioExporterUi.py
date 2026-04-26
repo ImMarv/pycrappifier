@@ -30,6 +30,7 @@ class AudioExporterUI(QtWidgets.QWidget):
 
         # === Music Player ===
         self.play_btn = QPushButton("▶")
+        self.pause_btn = QPushButton("⏸")
         self.stop_btn = QPushButton("⏹")
 
         for btn in (self.play_btn, self.stop_btn):
@@ -41,6 +42,7 @@ class AudioExporterUI(QtWidgets.QWidget):
         controlsLayout.setAlignment(QtCore.Qt.AlignCenter)
         controlsLayout.setSpacing(8)
         controlsLayout.addWidget(self.play_btn)
+        controlsLayout.addWidget(self.pause_btn)
         controlsLayout.addWidget(self.stop_btn)
         controlsLayout.addWidget(self.music_slider)
 
