@@ -27,7 +27,30 @@ class AudioExporterUI(QtWidgets.QWidget):
         audioDetailsLayout = QHBoxLayout()
         audioDetailsLayout.setAlignment(QtCore.Qt.AlignCenter)
         audioDetailsLayout.addWidget(self.audioDetailsLabel)
-        
+
+        # === Music Player ===
+        self.play_btn = QPushButton("▶")
+        self.pause_btn = QPushButton("⏸")
+        self.stop_btn = QPushButton("⏹")
+        self.elapsed_time_label = QLabel("0:00")
+
+        for btn in (self.play_btn, self.stop_btn):
+            btn.setFixedSize(30, 30)
+
+        self.music_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+
+        controlsLayout = QHBoxLayout()
+        controlsLayout.setAlignment(QtCore.Qt.AlignCenter)
+        controlsLayout.setSpacing(8)
+        controlsLayout.addWidget(self.play_btn)
+        controlsLayout.addWidget(self.pause_btn)
+        controlsLayout.addWidget(self.stop_btn)
+        controlsLayout.addWidget(self.music_slider)
+        controlsLayout.addWidget(self.elapsed_time_label)
+
+        musicPlayerLayout = QVBoxLayout()
+        musicPlayerLayout.addLayout(controlsLayout)
+
 
         # === Bitrate slider ===
         self.bitrate_label = QLabel("Bitrate: ")
@@ -80,8 +103,10 @@ class AudioExporterUI(QtWidgets.QWidget):
         ## Main layout
         main_layout = QVBoxLayout()
         main_layout.addLayout(info_layout)
+        main_layout.addLayout(musicPlayerLayout)
         main_layout.addLayout(settings_layout)
         main_layout.addSpacing(5)
+        ## Export button layout
         main_layout.addLayout(exportButton_layout)
         self.setLayout(main_layout)
 
