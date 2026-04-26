@@ -1,27 +1,25 @@
 import os
 import sys
-from pygame import mixer
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent # type: ignore
+from PyQt5.QtCore import QUrl # type: ignore
+
 
 class AudioPlayer:
     def __init__(self):
+        self.player = QMediaPlayer()
+        self.player.setVolume(100)
         self.is_playing = False
-        self.current_position = 0
-        mixer.init()
-    def get_current_position(self):
-        if self.is_playing:
-            return mixer.music.get_pos() / 1000  # return position in seconds
-        return self.current_position
     def load(self, file_path):
-        if os.path.exists(file_path):
-            self.file_path = file_path
-        else:
-            raise FileNotFoundError("Audio file not found.")
+        url = QUrl.fromLocalFile(file_path)
+        self.player.setMedia(QMediaContent(url))
     def play(self):
-        mixer.music.load(self.file_path)
-        mixer.music.play()
-        self.is_playing = True
+        self.player.play()
+    def pause(self):
+        self.player.pause()
     def stop(self):
-        self.is_playing = False
-        self.current_position = 0
-        mixer.music.stop()
+        self.player.stop()
+    def get_current_position(self):
+        return self.player.position()
+    def get_duration(self):
+        return self.player.duration()
     

@@ -10,10 +10,8 @@ class MainWindow:
         self.ui = ui
         self.processor = AudioProcessor()
         self.audio_player = AudioPlayer()
-        # Adding a timer to update the music player slider periodically
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(500)  # Update every 500 ms
-        self.timer.timeout.connect(self.update_music_player_slider)
+        self.timer.setInterval(500)  # Update slider every 100 ms
         self.connect_signals()
 
     def connect_signals(self):
@@ -21,7 +19,11 @@ class MainWindow:
         self.ui.browse_btn.clicked.connect(self.browse_file)
         self.ui.export_btn.clicked.connect(self.export_audio)
         self.ui.bitrateSlider.valueChanged.connect(self.update_bitrate_label)
+        # update the music player slider position every time the timer ticks
+        self.ui.music_slider.sliderMoved.connect(self.update_slider_position)
+        self.timer.timeout.connect(self.update_music_player_slider)
         self.ui.play_btn.clicked.connect(self.music_player_play)
+        self.ui.pause_btn.clicked.connect(self.audio_player.pause)
         self.ui.stop_btn.clicked.connect(self.music_player_stop)
 
     def browse_file(self):
@@ -47,7 +49,6 @@ class MainWindow:
             return
         # unhide audio details label
         self.ui.audioDetailsLabel.setVisible(True)
-        
 
         mins, secs = divmod(int(info["duration"]), 60)
         duration_str = f"{mins}:{secs:02d} min"
@@ -68,25 +69,35 @@ class MainWindow:
         """Starts the music player and timer."""
         self.audio_player.play()
         self.timer.start()
+        self.audio_player.is_playing = True
     def music_player_stop(self):
         """Stops the music player and reset the timer and slider."""
         self.audio_player.stop()
         self.timer.stop()
+        self.audio_player.is_playing = False
         self.ui.music_slider.setValue(0)
+    def music_player_pause(self):
+        """Pauses the music player and stops the timer."""
+        self.audio_player.pause()
+        self.timer.stop()
+        self.audio_player.is_playing = False
     
     def update_music_player_slider_length(self):
         """Updates the length of the music player slider based on the audio's total length."""
-        total_length = int(self.processor.get_audio_info(self.ui.file_label.text())["duration"])
+        total_length = self.audio_player.get_duration()
         self.ui.music_slider.setMaximum(total_length)
+        self.ui.music_slider.setValue(0)
 
     def update_music_player_slider(self):
         """Updates the position slider based on the audio's current timeframe."""
-        if not self.audio_player.is_playing:
-            return
-        current_position = int(self.audio_player.get_current_position())
-        self.ui.music_slider.blockSignals(True)
-        self.ui.music_slider.setValue(current_position)
-        self.ui.music_slider.blockSignals(False)
+        if self.audio_player.is_playing:
+            self.update_music_player_slider_length()  # ensure slider max is correct
+            current_pos = int(self.audio_player.get_current_position())
+            self.ui.music_slider.setValue(current_pos)
+
+    def update_slider_position(self, position):
+        """Updates the audio player's position based on the slider's value."""
+        self.audio_player.player.setPosition(position)
 
     def export_audio(self):
         """Export the audio file with the selected settings."""
