@@ -1,5 +1,3 @@
-import os
-import sys
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent # type: ignore
 from PyQt5.QtCore import QUrl # type: ignore
 
