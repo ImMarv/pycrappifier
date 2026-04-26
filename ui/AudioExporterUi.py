@@ -32,6 +32,7 @@ class AudioExporterUI(QtWidgets.QWidget):
         self.play_btn = QPushButton("▶")
         self.pause_btn = QPushButton("⏸")
         self.stop_btn = QPushButton("⏹")
+        self.elapsed_time_label = QLabel()
 
         for btn in (self.play_btn, self.stop_btn):
             btn.setFixedSize(30, 30)
@@ -45,6 +46,7 @@ class AudioExporterUI(QtWidgets.QWidget):
         controlsLayout.addWidget(self.pause_btn)
         controlsLayout.addWidget(self.stop_btn)
         controlsLayout.addWidget(self.music_slider)
+        controlsLayout.addWidget(self.elapsed_time_label)
 
         musicPlayerLayout = QVBoxLayout()
         musicPlayerLayout.addLayout(controlsLayout)
