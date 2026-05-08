@@ -12,7 +12,6 @@ class AudioExporterUI(QtWidgets.QWidget):
         self.setWindowTitle("Pycrappify")
         # Avoid making UI full screen
         self.setFixedSize(500, self.sizeHint().height())
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.setStyleSheet("background-color: #1a1a1f; color: white; font-size: 12pt;")
 
         # === File selection ===
