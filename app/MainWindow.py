@@ -2,6 +2,7 @@ import os
 from PyQt5 import QtWidgets, QtCore # type: ignore
 from core.AudioPlayer import AudioPlayer
 from core.AudioProcessor import AudioProcessor
+from core.dto.command import Command, SamplingMode
 
 class MainWindow:
     """Controller that binds UI signals to logic."""
@@ -25,6 +26,7 @@ class MainWindow:
         self.ui.play_btn.clicked.connect(self.music_player_play)
         self.ui.pause_btn.clicked.connect(self.audio_player.pause)
         self.ui.stop_btn.clicked.connect(self.music_player_stop)
+        self.ui.bitcrush_switch.stateChanged.connect(self.update_bitcrush_settings_visibility)
 
     def browse_file(self):
         """Open a file dialog to select an audio file."""
@@ -41,8 +43,14 @@ class MainWindow:
             self.audio_player.load(file_name)
             self.update_music_player_slider_length()
 
-    def update_audio_settings(self, file_path):
+    def update_audio_settings(self, file_path=None):
         """Update UI elements based on the selected audio file's properties."""
+        if not isinstance(file_path, str) or not file_path:
+            file_path = self.ui.file_label.text()
+        if not file_path:
+            self.ui.audioDetailsLabel.setText("Could not read audio info.")
+            return
+
         info = self.processor.get_audio_info(file_path)
         if not info:
             self.ui.audioDetailsLabel.setText("Could not read audio info.")
@@ -60,7 +68,21 @@ class MainWindow:
             f"{info['filename']} - {duration_str} | {bitrate_kbps} kbps, {sample_rate_str} | {channels_str}"
         )
         self.ui.bitrateSlider.setMaximum(max(bitrate_kbps, 320))
-        self.ui.stereoSwitch.setChecked(info["channels"] == 1)
+        self.ui.stereo_switch.setChecked(info["channels"] == 1)
+    
+    def update_bitcrush_settings_visibility(self):
+        """Show or hide bitcrush settings based on the checkbox state."""
+        is_bitcrush_enabled = self.ui.bitcrush_switch.isChecked()
+        self.ui.bitcrush_settings_widget.setVisible(is_bitcrush_enabled)
+
+    def update_bitcrush_settings(self):
+        """Update bitcrush settings based on the UI inputs."""
+        level_in = str(self.ui.bitcrush_level_in_slider.value() / 10.0)
+        level_out = str(self.ui.bitcrush_level_out_slider.value() / 10.0)
+        bits = str(self.ui.bitcrush_bits_slider.value())
+        mix = str(self.ui.bitcrush_mix_slider.value() / 100.0)
+        sampling_mode = self.ui.bitcrush_sampling_combo.currentText()
+        sampling_mode = SamplingMode.LINEAR.name if sampling_mode == "Linear" else SamplingMode.LOGARITHMIC.name
 
     def update_bitrate_label(self):
         """Update the bitrate label when the slider value changes."""
@@ -97,7 +119,7 @@ class MainWindow:
             self.ui.music_slider.setValue(current_pos)
 
     def update_slider_position(self, position):
-        """Updates the audio player's position based on the slider's value."""
+        """Updates the audio player's position based on the UI values."""
         self.audio_player.player.setPosition(position)
 
     def export_audio(self):
@@ -108,9 +130,18 @@ class MainWindow:
             return
 
         output_file = input_file.rsplit('.', 1)[0] + "_processed.mp3"
-        bitrate = f"{self.ui.bitrateSlider.value()}k"
+        bitrate = self.ui.bitrateSlider.value()
         sample_rate = int(self.ui.sampleRateCombo.currentText())
-        mono = self.ui.stereoSwitch.isChecked()
+        level_in = self.ui.bitcrush_level_in_slider.value() / 10.0
+        level_out = self.ui.bitcrush_level_out_slider.value() / 10.0
+        bits = self.ui.bitcrush_bits_slider.value()
+        mix = self.ui.bitcrush_mix_slider.value() / 100.0
+        sampling_mode = self.ui.bitcrush_sampling_combo.currentText()
+        if sampling_mode == "Linear":
+            sampling_mode = SamplingMode.LINEAR
+        else:
+            sampling_mode = SamplingMode.LOGARITHMIC
+        mono = self.ui.stereo_switch.isChecked()
 
         if os.path.exists(output_file):
             msg = QtWidgets.QMessageBox.question(
@@ -119,9 +150,23 @@ class MainWindow:
             )
             if msg != QtWidgets.QMessageBox.Yes:
                 return
+        command = Command(
+            input_file=input_file,
+            output_file=output_file,
+            bitrate=bitrate,
+            sample_Rate=sample_rate,
+            level_in=level_in,
+            level_out=level_out,
+            bits=bits,
+            mix=mix,
+            sampling=sampling_mode,
+            has_bitcrush=self.ui.bitcrush_switch.isChecked(),
+            overwrite=True,
+            mono=mono
+        )
 
         try:
-            self.processor.compress(input_file, output_file, bitrate, sample_rate, mono)
+            self.processor.compress(command)
             QtWidgets.QMessageBox.information(self.ui, "Success", "Audio exported successfully!")
         except Exception as exc:
             QtWidgets.QMessageBox.critical(self.ui, "Error", f"Failed to export audio:\n{exc}")
