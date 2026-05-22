@@ -16,7 +16,7 @@ class Command:
     bits:int | None
     mix:float | None
     sampling:SamplingMode | None
-    overwrite:bool = False
+    overwrite:bool = True
     mono:bool = False
     has_bitcrush:bool = False
 
