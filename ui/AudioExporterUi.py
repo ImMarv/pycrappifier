@@ -87,8 +87,8 @@ class AudioExporterUI(QtWidgets.QWidget):
         if os.path.exists(output_file):
             msg = QtWidgets.QMessageBox.question(
                 self,
-                "Overwrite?",
-                "Output file exists. Overwrite?",
+                "Overwrite File",
+                f"Output file '{output_file}' exists. Do you want to overwrite it?",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                 QtWidgets.QMessageBox.No,
             )
