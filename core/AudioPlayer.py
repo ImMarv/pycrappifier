@@ -2,7 +2,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent # type: ignore
 from PyQt5.QtCore import QUrl # type: ignore
 
 
-class AudioPlayer:
+class MusicPlayer:
     def __init__(self):
         self.player = QMediaPlayer()
         self.player.setVolume(100)
